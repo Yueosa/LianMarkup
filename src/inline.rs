@@ -28,7 +28,9 @@ impl Parser {
                     }
                 }
                 '*' => {
-                    if let Some(end) = self.paired(&chars, i, &['*', '*'], "strong", &mut out) {
+                    if let Some(end) = self.bold_italic(&chars, i, &mut out) {
+                        i = end;
+                    } else if let Some(end) = self.paired(&chars, i, &['*', '*'], "strong", &mut out) {
                         i = end;
                     } else if let Some(end) = self.paired(&chars, i, &['*'], "em", &mut out) {
                         i = end;
@@ -109,6 +111,22 @@ impl Parser {
             }
         }
         out
+    }
+
+    /// `***粗斜体***`: 渲染为 <strong><em> 嵌套, 先于 `**` 尝试
+    fn bold_italic(&mut self, chars: &[char], i: usize, out: &mut String) -> Option<usize> {
+        if chars[i..].len() < 3 || chars[i..i + 3] != ['*', '*', '*'] {
+            return None;
+        }
+        let close = find_close(chars, i + 3, &['*', '*', '*'])?;
+        if close == i + 3 {
+            return None;
+        }
+        let inner = self.parse_inline(&slice(chars, i + 3, close));
+        out.push_str("<strong><em>");
+        out.push_str(&inner);
+        out.push_str("</em></strong>");
+        Some(close + 3)
     }
 
     /// 行内代码: 内部不解析任何语法

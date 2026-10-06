@@ -71,6 +71,12 @@ fn inline_basic_styles() {
 }
 
 #[test]
+fn inline_bold_italic() {
+    let out = html("***粗斜体***\n");
+    assert!(out.contains("<strong><em>粗斜体</em></strong>"));
+}
+
+#[test]
 fn unpaired_delimiter_falls_back() {
     // 规范 0x01: 不配对的 * 原样输出
     let out = html("2*3=6 不是斜体\n");
