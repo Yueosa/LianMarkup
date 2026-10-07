@@ -451,3 +451,14 @@ fn comment_inside_quote_is_skipped() {
     assert!(out.contains("可见内容"));
     assert!(!out.contains("悄悄话"));
 }
+
+#[test]
+fn note_with_nested_link_keeps_full_content() {
+    // first-post.ly 踩到的真 bug: 旁注里嵌链接, 闭合 ] 必须按深度配对
+    let doc = parse("正文[^备注里有 [GitHub](https://example.com) 链接]收尾\n");
+    assert_eq!(doc.notes.len(), 1);
+    assert!(doc.notes[0].html.contains("<a href=\"https://example.com\">GitHub</a>"));
+    assert!(doc.notes[0].html.contains("链接"));
+    assert!(doc.html.contains("收尾"));
+    assert!(!doc.html.contains("https://example.com)"));
+}
