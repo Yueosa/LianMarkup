@@ -462,3 +462,41 @@ fn note_with_nested_link_keeps_full_content() {
     assert!(doc.html.contains("收尾"));
     assert!(!doc.html.contains("https://example.com)"));
 }
+
+// ---------- 行内容器 {.class} ----------
+
+#[test]
+fn span_with_class() {
+    let out = html("[抖动的文字]{.shake}\n");
+    assert!(out.contains("<span class=\"lm-shake\">抖动的文字</span>"));
+}
+
+#[test]
+fn span_with_params_becomes_custom_properties() {
+    let out = html("[渐变]{.gradient from=#ff6b6b to=#4ecdc4}\n");
+    assert!(out.contains("class=\"lm-gradient\""));
+    assert!(out.contains("style=\"--from:#ff6b6b;--to:#4ecdc4\""));
+}
+
+#[test]
+fn span_spec_without_dot_falls_back() {
+    let out = html("[文字]{不是类名}\n");
+    assert!(out.contains("[文字]{不是类名}"));
+}
+
+// ---------- 示例块 ----------
+
+#[test]
+fn example_block_shows_source_and_render() {
+    let out = html(":::\n**加粗**\n:::\n");
+    assert!(out.contains("<div class=\"lm-example\">"));
+    assert!(out.contains("<pre class=\"lm-example-source\">**加粗**</pre>"));
+    assert!(out.contains("<strong>加粗</strong>"));
+}
+
+#[test]
+fn example_headings_do_not_pollute_toc() {
+    let doc = parse("# 真标题\n\n:::\n## 示例标题\n:::\n");
+    assert_eq!(doc.toc.len(), 1);
+    assert_eq!(doc.toc[0].text, "真标题");
+}
