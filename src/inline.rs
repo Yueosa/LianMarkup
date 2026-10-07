@@ -80,7 +80,7 @@ impl Parser {
                     }
                 }
                 '[' => {
-                    // `[[slug]]` 站内链接 v1 不实现, 靠回退规则原样输出
+                    // 双方括号不是语法, 靠回退规则原样输出
                     if let Some(end) = self.link(&chars, i, &mut out) {
                         i = end;
                     } else {

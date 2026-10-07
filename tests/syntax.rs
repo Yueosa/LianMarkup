@@ -191,8 +191,8 @@ fn ruby_escaped_pipe() {
 }
 
 #[test]
-fn wiki_link_falls_back_v1() {
-    // [[slug]] v1 不实现, 原样输出
+fn double_bracket_falls_back() {
+    // 双方括号不是语法, 原样输出
     let out = html("参见 [[other-post]] 和 [[a|b]]\n");
     assert!(out.contains("[[other-post]]"));
     assert!(!out.contains("<a href"));
