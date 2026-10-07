@@ -500,3 +500,19 @@ fn example_headings_do_not_pollute_toc() {
     assert_eq!(doc.toc.len(), 1);
     assert_eq!(doc.toc[0].text, "真标题");
 }
+
+// ---------- 幕间转换线 ----------
+
+#[test]
+fn heavy_break_renders_lm_break() {
+    let out = html("上一幕\n\n___\n\n下一幕\n");
+    assert!(out.contains("<hr class=\"lm-break\">"));
+}
+
+#[test]
+fn heavy_break_inside_paragraph_splits() {
+    let out = html("第一段\n___\n第二段\n");
+    assert!(out.contains("<hr class=\"lm-break\">"));
+    assert!(out.contains("<p>第一段</p>"));
+    assert!(out.contains("<p>第二段</p>"));
+}

@@ -41,6 +41,10 @@ impl Parser {
             } else if line.trim_end() == "---" {
                 out.push_str("<hr>\n");
                 i += 1;
+            } else if line.trim_end() == "___" {
+                // 幕间转换线: 比 --- 更重的分隔
+                out.push_str("<hr class=\"lm-break\">\n");
+                i += 1;
             } else if is_toc_directive(line) {
                 // 示例块里的 @toc 只是演示, 不影响真实目录
                 if !self.in_example {
@@ -526,6 +530,7 @@ fn is_block_start(lines: &[&str], i: usize) -> bool {
         || line.starts_with("> ")
         || heading(line).is_some()
         || line.trim_end() == "---"
+        || line.trim_end() == "___"
         || is_toc_directive(line)
         || list_item(line).is_some()
         || (line.starts_with('|')
