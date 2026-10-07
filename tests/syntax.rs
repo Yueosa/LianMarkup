@@ -423,3 +423,31 @@ fn document_serializes_to_contract_shape() {
     assert_eq!(json["notes"][0]["anchor"], "note-1");
     assert_eq!(json["notes"][0]["index"], 1);
 }
+
+// ---------- 注释 ----------
+
+#[test]
+fn comment_line_is_not_rendered() {
+    let out = html("// 这行是注释\n可见文本\n");
+    assert!(!out.contains("这行是注释"));
+    assert!(out.contains("可见文本"));
+}
+
+#[test]
+fn comment_inside_paragraph_is_skipped() {
+    let out = html("第一段\n// 插入的注释\n第二行\n");
+    assert!(out.contains("<p>第一段\n第二行</p>"));
+}
+
+#[test]
+fn comment_inside_code_fence_is_preserved() {
+    let out = html("```\n// 代码里的注释要保留\n```\n");
+    assert!(out.contains("// 代码里的注释要保留"));
+}
+
+#[test]
+fn comment_inside_quote_is_skipped() {
+    let out = html("> // 引用里的悄悄话\n> 可见内容\n");
+    assert!(out.contains("可见内容"));
+    assert!(!out.contains("悄悄话"));
+}

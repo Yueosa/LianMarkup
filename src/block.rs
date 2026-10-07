@@ -17,6 +17,10 @@ impl Parser {
                 i += 1;
                 continue;
             }
+            if is_comment(line) {
+                i += 1;
+                continue;
+            }
             if line.starts_with("```") {
                 i = self.parse_code_fence(&lines, i, &mut out);
             } else if line.starts_with("~~~") {
@@ -337,21 +341,32 @@ impl Parser {
         i
     }
 
-    /// 段落: 默认语法, 合并连续的非块级行直到空行
+    /// 段落: 默认语法, 合并连续的非块级行直到空行, 注释行悄悄移除
     fn parse_paragraph(&mut self, lines: &[&str], start: usize, out: &mut String) -> usize {
         let mut end = start;
+        let mut buf: Vec<&str> = Vec::new();
         while end < lines.len() && !lines[end].trim().is_empty() {
-            if end > start && is_block_start(lines, end) {
+            if is_comment(lines[end]) {
+                end += 1;
+                continue;
+            }
+            if !buf.is_empty() && is_block_start(lines, end) {
                 break;
             }
+            buf.push(lines[end]);
             end += 1;
         }
-        let text = lines[start..end].join("\n");
+        let text = buf.join("\n");
         out.push_str("<p>");
         out.push_str(&self.parse_inline(&text));
         out.push_str("</p>\n");
         end
     }
+}
+
+/// 注释行: 行首 `//` + 空格 (或整行只有 `//`), 不渲染
+fn is_comment(line: &str) -> bool {
+    line == "//" || line.starts_with("// ")
 }
 
 /// 折叠块头: `>>>` 或 `>>>+`, 关键字后必须跟空格或行尾
